@@ -1,0 +1,33 @@
+\contentsline {section}{\numberline {1}Charakterystyki baz danych}{2}{section.1}% 
+\contentsline {subsection}{\numberline {1.1}Bazy danych produkcyjne}{2}{subsection.1.1}% 
+\contentsline {subsection}{\numberline {1.2}Hurtownie danych}{2}{subsection.1.2}% 
+\contentsline {subsubsection}{\numberline {1.2.1}Znormalizowane vs. wielowymiarowe podej\IeC {\'s}cie do gromadzenia danych}{3}{subsubsection.1.2.1}% 
+\contentsline {subsection}{\numberline {1.3}Bazy analityczne: OLAP}{3}{subsection.1.3}% 
+\contentsline {subsubsection}{\numberline {1.3.1}Budowa kostki}{4}{subsubsection.1.3.1}% 
+\contentsline {subsection}{\numberline {1.4}Jeziora danych}{4}{subsection.1.4}% 
+\contentsline {subsection}{\numberline {1.5}Bazy danych NoSQL}{5}{subsection.1.5}% 
+\contentsline {subsection}{\numberline {1.6}Big Data}{5}{subsection.1.6}% 
+\contentsline {section}{\numberline {2}Poziomy izolacji transkacji}{6}{section.2}% 
+\contentsline {subsection}{\numberline {2.1}Izolacja dla system\IeC {\'o}w z blokowaniem}{6}{subsection.2.1}% 
+\contentsline {subsubsection}{\numberline {2.1.1}Podstawowe poziomy izolacji}{7}{subsubsection.2.1.1}% 
+\contentsline {subsubsection}{\numberline {2.1.2}Poziom izolacji Cursor Stability}{7}{subsubsection.2.1.2}% 
+\contentsline {subsection}{\numberline {2.2}Poziom izolacji Snapshot i podobne}{7}{subsection.2.2}% 
+\contentsline {section}{\numberline {3}Kursory}{8}{section.3}% 
+\contentsline {subsection}{\numberline {3.1}ISO}{8}{subsection.3.1}% 
+\contentsline {subsection}{\numberline {3.2}T-SQL}{9}{subsection.3.2}% 
+\contentsline {subsection}{\numberline {3.3}Sterowanie wsp\IeC {\'o}\IeC {\l }bie\IeC {\.z}no\IeC {\'s}ci\IeC {\k a}}{9}{subsection.3.3}% 
+\contentsline {subsection}{\numberline {3.4}Przyk\IeC {\l }ad}{9}{subsection.3.4}% 
+\contentsline {section}{\numberline {4}Obs\IeC {\l }uga transakcji w procedurach sk\IeC {\l }adowanych}{10}{section.4}% 
+\contentsline {section}{\numberline {5}Odtwarzanie baz danych po awarii}{10}{section.5}% 
+\contentsline {section}{\numberline {6}Mirroring i database snapshot}{10}{section.6}% 
+\contentsline {section}{\numberline {7}Replikacja}{10}{section.7}% 
+\contentsline {subsection}{\numberline {7.1}Definicja}{10}{subsection.7.1}% 
+\contentsline {subsection}{\numberline {7.2}Podstawowe metody replikacji w systemie Microsoft SQL Server}{10}{subsection.7.2}% 
+\contentsline {section}{\numberline {8}Widoki rozproszone}{10}{section.8}% 
+\contentsline {section}{\numberline {9}Podstawowa charakterystyka transakcji rozproszonych}{10}{section.9}% 
+\contentsline {section}{\numberline {10}MongoDB}{10}{section.10}% 
+\contentsline {subsection}{\numberline {10.1}Podstawowe operacje}{11}{subsection.10.1}% 
+\contentsline {subsubsection}{\numberline {10.1.1}Insert}{11}{subsubsection.10.1.1}% 
+\contentsline {subsubsection}{\numberline {10.1.2}Find}{11}{subsubsection.10.1.2}% 
+\contentsline {section}{\numberline {11}XML w systemie Microsoft SQL Server}{12}{section.11}% 
+\contentsline {section}{\numberline {12}Przetwarzanie graf\IeC {\'o}w ?}{13}{section.12}% 
