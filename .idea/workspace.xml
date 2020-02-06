@@ -38,14 +38,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../BD2_Notatki/main.tex">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="749" lean-forward="true" selection-start-line="749" selection-end-line="749" />
+            <state relative-caret-position="206">
+              <caret line="1116" column="45" selection-start-line="1116" selection-start-column="45" selection-end-line="1116" selection-end-column="45" />
               <folding>
                 <element signature="e#34#55#2" expanded="true" />
                 <element signature="e#19717#19728#3" expanded="true" />
-                <element signature="e#45856#45860#3" expanded="true" />
-                <element signature="e#46130#46134#3" expanded="true" />
-                <element signature="e#46270#46274#3" expanded="true" />
+                <element signature="e#58266#58270#3" expanded="true" />
+                <element signature="e#58540#58544#3" expanded="true" />
+                <element signature="e#58680#58684#3" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -86,7 +86,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="1056" />
+    <option name="width" value="1014" />
     <option name="height" value="956" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -142,19 +142,19 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1580663348675</updated>
-      <workItem from="1580663350980" duration="22575000" />
+      <workItem from="1580663350980" duration="28489000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22575000" />
+    <option name="totallyTimeSpent" value="28489000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1056" height="956" extended-state="0" />
+    <frame x="0" y="23" width="1014" height="956" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="0" weight="0.24193548" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.24161735" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="Version Control" />
@@ -196,14 +196,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../BD2_Notatki/main.tex">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="749" lean-forward="true" selection-start-line="749" selection-end-line="749" />
+        <state relative-caret-position="206">
+          <caret line="1116" column="45" selection-start-line="1116" selection-start-column="45" selection-end-line="1116" selection-end-column="45" />
           <folding>
             <element signature="e#34#55#2" expanded="true" />
             <element signature="e#19717#19728#3" expanded="true" />
-            <element signature="e#45856#45860#3" expanded="true" />
-            <element signature="e#46130#46134#3" expanded="true" />
-            <element signature="e#46270#46274#3" expanded="true" />
+            <element signature="e#58266#58270#3" expanded="true" />
+            <element signature="e#58540#58544#3" expanded="true" />
+            <element signature="e#58680#58684#3" expanded="true" />
           </folding>
         </state>
       </provider>

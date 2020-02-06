@@ -750,12 +750,241 @@
 
     \section{Widoki rozproszone.}
 
+    Ideą tych widoków jest \textbf{rozłożenie obciążenia} na dwa lub więcej serwerów poprzez podzielenie poziome
+    całego zestawu danych (wszystkich wierszy) według zadanych kryteriów:
+    \begin{enumerate}
+        \item \textbf{Na obu serwerach tworzymy odpowiednie tabele} do przetrzymywania naszych danych. Załóżmy że
+        będziemy chcieli partycjonować nasze dane ze względu na nazwisko, tak aby nazwiska od A-M włącznie
+        były na jednym serwerze a reszta na drugim:
+        \begin{itemize}
+            \item \textbf{Na tworzonych tabelach musimy założyć CONSTRAINTy na kolumny, po których będziemy
+            partycjonować!} To dzięki niemu serwer podczas wykonywania kwerendy będzie wiedział do którego serwera
+            skierować zapytanie, oraz będziemy mieli pewność, że nie wstawimy rekordu na nieodpowiedni serwer.
+            \item Na pierwszym serwerze mogłoby wyglądać to tak:
+            \begin{lcverbatim}
+                CREATE TABLE UsersAM(
+                first_name varchar(40) NOT NULL,
+                surname varchar(20) NULL,
+                CONSTRAINT CHK_UsersAM CHECK (surname < 'N')
+                )
+            \end{lcverbatim}
+        \end{itemize}
+        \begin{itemize}
+            \item Natomiast na drugim serwerze mogłoby wyglądać to tak:
+            \begin{lcverbatim}
+                CREATE TABLE UsersNZ(
+                first_name varchar(40) NOT NULL,
+                surname varchar(20) NULL,
+                CONSTRAINT CHK_UsersNZ CHECK (surname >= 'N')
+                )
+            \end{lcverbatim}
+        \end{itemize}
+
+        \item TNa każdym z serwerów musimy skonfigurować \textbf{linked servers} czyli serwery do których będziemy
+        mogli \textbf{zdalnie zadawać zapytania}. W naszym przypadku na serwerze pierwszym naszym linked serwerem
+        będzie serwer drugi, a na drugim pierwszy.
+        \begin{itemize}
+            \item Konfigurując Linked server podajemy jego \textbf{alias}, \textbf{sterownik OLE DB}, którego będziemy
+            używać do komunikacji z linked serwerem, oraz właściwą \textbf{ścieżkę do serwera} (w przypadku MSSQL
+            Servera jest to NazwaKomputera\textbackslash NazwaInstancji, lub gdy jest to instancja domyślna wystarczy
+            sama nazwa komputera)
+            \item Dodatkowo musimy \textbf{skonfigurować uwierzytelnienie} między tymi serwerami. W domenie Windows
+            sprowadza się to do \textbf{nadania odpowiednich uprawnień} użytkownikowi (wykonującemu zapytanie?). W
+            przeciwnym przypadku musimy skorzystać z \textbf{uwierzytelnienia SQL} tworząc odpowiedniego
+            użytkownika na jednym i drugim serwerze oraz konfigurując Linked server login na obu serwerach.
+            \item Gdy będziemy chcieli na serwerze o aliasie ``Server2'' z bazy ``Database'' wybrać wszystkie rekordy
+            z tabeli ``UsersNZ'' będziemy musieli użyć następującego zapytania:
+            \begin{lcverbatim}
+                SELECT *
+                FROM Server2.Database.dbo.UsersNZ
+            \end{lcverbatim}
+        \end{itemize}
+
+        \item Teraz na każdym z serwerów tworzymy \textbf{widok rozproszony}, który będzie \textbf{wybierał dane z obu}
+        serwerów. W naszym przypadku taki widok na serwerze pierwszym może wyglądać następująco:
+        \begin{lcverbatim}
+            CREATE VIEW AllUsers
+            AS
+            SELECT *
+            FROM UsersAM
+
+            UNION ALL
+
+            SELECT *
+            FROM Server2.Database.dbo.UsersNZ
+
+            GO
+        \end{lcverbatim}
+
+        \item Teraz gdy wydamy \textbf{zapytanie} do widoku \textbf{erwer na podstawie constraintów} zdefiniowanych
+        dla tabel \textbf{zdecyduje gdzie skierować zapytanie}.
+    \end{enumerate}
+
+
     \section{Podstawowa charakterystyka transakcji rozproszonych.}
 
-    Transakcja rozproszona to transakcja, której polecenia DML (insert, update, delete) i select odwołują się do tabel
-    znajdujących się co najmniej w dwóch węzłach rozproszonej bazy danych. Transakcja rozproszona jest często nazywana
-    transakcją globalną.
+    \textbf{Transakcja rozproszona} to transakcja, której \textbf{polecenia DML} (insert, update, delete) i select
+    \textbf{odwołują się do tabel} znajdujących się co najmniej w dwóch \textbf{węzłach rozproszonej bazy} danych.
+    Transakcja rozproszona jest często nazywana \textbf{transakcją globalną}.
+    \begin{itemize}
+        \item Transakcja rozproszona jest reprezentowana przez \textbf{zbiór transakcji lokalnych}.
+        \item \textbf{W każdej z baz} danych, do której odwołuje się transakcja rozproszona tworzona jest jedna \textbf{transakcja lokalna}.
+        \item \textbf{Cechy} transakcji rozproszonej
+        \begin{itemize}
+            \item \textbf{Trwałość}
+            \item \textbf{Spójność}
+            \item \textbf{Izolacja}
+            \item \textbf{Atomowość} - \textbf{wszystkie transakcje} lokalne \textbf{zatwierdzone} lub wszystkie \textbf{wycofane} (2PC)
+        \end{itemize}
+    \end{itemize}
 
+
+    \subsection{Aktorzy}
+    \begin{itemize}
+        \item Każdy węzeł do którego odwołuje się transakcja rozproszona pełni \textbf{ściśle określoną funkcję}.
+        \item Rodzaje węzłów:
+        \begin{itemize}
+            \item \textbf{Koordynator globalny} (ang. global coordinator) jest tym węzłem z którego
+            \textbf{zainicjowano transakcję} rozproszoną. Zadaniem koordynatora globalnego jest
+            \textbf{zarządzanie} całą \textbf{transakcją}, tj. doprowadzenie jej w całości do zatwierdzenia lub
+            wycofania.
+
+            \item \textbf{Koordynator lokalny} (ang. local coordinator) jest węzłem który \textbf{otrzymuje
+            żądanie}, \textbf{przetwarza} je i \textbf{wysyła} kolejne żądania do innych podległych mu
+            węzłów. KL nie \textbf{koordynuje} całej transakcji globalnej a jedynie \textbf{te żądania, które}
+            sam \textbf{wysłał}.
+
+            \item \textbf{Uczestnik} (ang. node) jest węzłem, \textbf{do którego jest kierowane żądanie} transakcji
+            rozproszonej, a sam węzeł \textbf{nie wysyła} żadnych \textbf{żądań}.
+
+            \item \textbf{Węzeł zatwierdzania} (WZ):
+            \begin{itemize}
+                \item \textbf{inicjowanie zatwierdzania lub wycofywania} transakcji \textbf{zgodnie z komunikatem od KG} (jako pierwszy je wykonuje)
+                \item zawiera \textbf{status zatwierdzania} transakcji rozproszonej odczytywany przez transakcje lokalne
+                \item wybierany przez administratora systemu
+                \begin{itemize}
+                    \item parametr konfiguracyjny \textbf{COMMIT\_POINT\_STRENGTH}: 0-255
+                    \item odzwierciedla \textbf{ilość danych krytycznych} w węźle i jego \textbf{niezawodność}
+                \end{itemize}
+                \item węzeł o najwyższej wartości COMMIT\_POINT\_STRENGTH jest węzłem zatwierdzania
+                \item \textbf{transakcja rozproszona} jest \textbf{uznawana za zatwierdzoną} jeżeli zostanie \textbf{zatwierdzona w węźle
+                zatwierdzania}, nawet jeśli pozostałe węzły jeszcze nie zatwierdziły swoich transakcji lokalnych
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+
+    \subsection{Protokół zatwierdzania dwu-fazowego (2PC)}
+    \begin{itemize}
+        \item \textbf{Gwarantuje atomowość} zatwierdzania lub wycofywania transakcji rozproszonej.
+        \item \textbf{Fazy realizacji}:
+        \begin{itemize}
+            \item \textbf{przygotowanie} (prepare) transakcji lokalnych do zatwierdzania lub wycofywania.
+            \item \textbf{zatwierdzanie} (commit) lub wycofywanie transakcji lokalnych.
+            \item \textbf{zakończenie} (forget) - usuwanie z systemu informacji o transakcji rozproszonej i
+            zwalnianie niezwolnionych w fazie zatwierdzania zasobów.
+        \end{itemize}
+    \end{itemize}
+
+
+    \subsubsection{Faza przygotowania}
+    \begin{enumerate}
+        \item \textbf{KG wybiera węzeł zatwierdzania} spośród spośród
+        wszystkich węzłów biorących udział w transakcji rozproszonej.
+        \item KG \textbf{wysyła} do wszystkich węzłów z wyjątkiem węzła zatwierdzania
+        \textbf{komunikat PREPARE}, wymuszający przygotowanie transakcji lokalnych do zatwierdzenia.
+        \item Po zakończeniu operacji przygotowania do zatwierdzenia transakcji, \textbf{każdy
+        węzeł przesyła} do KG \textbf{komunikat PREPARED} jeżeli się
+        przygotował do zatwierdzenia swojej transakcji lokalnej.
+        \item W ostatnim kroku tej fazy \textbf{KG odbiera komunikaty} od
+        wszystkich węzłów, z wyjątkiem węzła zatwierdzania. Po ich odebraniu
+        następuje \textbf{przejście do fazy zatwierdzania}.
+    \end{enumerate}
+
+    Faza przygotowania w \textbf{węźle uczestnika}:
+    \begin{enumerate}
+        \item \textbf{Odbiór komunikatu PREPARE} od KG.
+        \item Dokonanie \textbf{zapisów} w bieżących plikach \textbf{dziennika powtórzeń} (ang. online
+        redo logs). W plikach tych znajdują się wszystkie zmiany wykonane w bazie
+        danych wprowadzone zarówno przez zatwierdzone, jak i niezatwierdzone transakcje. Informacje z
+        plików dziennika powtórzeń są wykorzystywane w czasie odtwarzania bazy danych po awarii.
+        \item Wysłanie komunikatu \textbf{PREPARE do węzłów podległych}.
+        \item \textbf{Odbiór} komunikatów od węzłów podległych.
+        \item \textbf{Wysłanie} komunikatu do KG.
+    \end{enumerate}
+
+    \begin{itemize}
+        \item Jeżeli w węźle \textbf{nie dokonano modyfikacji} danych wysyła on komunikat \textbf{READ-ONLY}.
+        \item Jeśli uczestnik i wszystkie węzły mu podległe są przygotowane do
+        zatwierdzania, to wysyła on do KG komunikat \textbf{PREPARED}.
+        \item Jeśli choć jeden węzeł nie mógł się przygotować, to uczestnik \textbf{wycofuje swoją
+        transakcję lokalną} i wysyła do koordynatora globalnego komunikat \textbf{ABORT}.
+    \end{itemize}
+
+    \subsubsection{Faza zatwierdzania}
+    \begin{enumerate}
+        \item \textbf{KG odbiera potwierdzenia} od uczestników.
+        \item Jeśli wszyscy odpowiedzieli komunikatem PREPARED, wówczas KG wysyła
+        \textbf{do węzła zatwierdzania komunikat COMMIT}, czyli żądanie zatwierdzenia
+        transakcji rozproszonej.
+        \item \textbf{WZ zatwierdza transakcję} i wysyła do KG komunikat
+        potwierdzający zatwierdzenie (\textbf{COMMITTED}).
+        \item Po otrzymaniu od WZ komunikatu COMMITTED, \textbf{KG wysyła} komunikat
+        \textbf{COMMIT} do pozostałych węzłów (uczestników).
+    \end{enumerate}
+
+    \textbf{Wycofanie} w fazie zatwierdzania:
+    \begin{enumerate}
+        \item KG odbiera potwierdzenia od uczestników.
+        \item Przynajmniej jeden węzeł odpowiedział komunikatem ABORT, więc \textbf{KG wysyła} do
+        WZ komunikat \textbf{ABORT}, czyli żądanie wycofania transakcji
+        rozproszonej.
+        \item \textbf{WZ wycofuje transakcję} i wysyła do KG komunikat
+        potwierdzający wycofanie (\textbf{ABORTED}).
+        \item Po otrzymaniu od WZ komunikatu ABORTED, \textbf{KG wysyła} komunikat \textbf{ABORT} do pozostałych węzłów (uczestników).
+    \end{enumerate}
+
+    Faza zatwierdzania w węźle \textbf{uczestnika}:
+    \begin{enumerate}
+        \item Odbiór COMMIT od KG.
+        \item Zatwierdzenie lokalnej transakcji.
+        \item Zwolnienie blokad.
+        \item Zapis informacji o zatwierdzeniu w pliku dziennika powtórzeń.
+    \end{enumerate}
+
+    \subsubsection{Faza zakończenia}
+    \begin{enumerate}
+        \item \textbf{Usunięcie} z systemu \textbf{informacji o} zakończonej \textbf{transakcji} rozproszonej.
+        \item \textbf{Zwolnienie} wszystkich niezwolnionych jeszcze \textbf{zasobów} systemowych.
+    \end{enumerate}
+
+    \begin{center}
+        \includegraphics[width=\textwidth]{2pc}
+    \end{center}
+
+    \subsection{Graf wywołań transakcji}
+    \begin{itemize}
+        \item Transakcje lokalne tworzą tzw. graf wywołań transakcji, zwany również \textbf{drzewem sesji}.
+        \item Wierzchołki to \textbf{węzły} (bazy).
+        \item Łuki (krawędzie) stanowią \textbf{żądania} wykonania poleceń z jednej bazy w innej.
+    \end{itemize}
+
+    \textbf{Problemy sprzętowo-programowe}
+    \begin{itemize}
+        \item W czasie fazy COMMIT (ROLLBACK) następuje awaria
+        sieci, węzła lub zdalnej bazy danych
+        \begin{itemize}
+            \item nie wszystkie węzły zatwierdziły (wycofały)
+            \item nie wszystkie węzły potwierdziły zakończenie operacji
+            \item transakcja rozproszona \textbf{w stanie zawieszenia ``in-doubt''} do momentu usnięcia awarii, nawiązania połączenia ze zdalnym
+            węzłem i doprowadzenia transakcji do końca.
+            \item transakcja w stanie ``in-doubt'' \textbf{blokuje dane}.
+        \end{itemize}
+        \item Automatyczne odtwarzanie transakcji rozproszonej w stanie “in-doubt” po usunięciu awarii
+        \begin{itemize}
+            \item wynik: wszystkie węzły zatwierdzą lub wszystkie wycofają
+        \end{itemize}
+    \end{itemize}
 
     \section{MongoDB.}
     \begin{itemize}
@@ -869,6 +1098,44 @@
     \end{itemize}
 
 
-    \section{Przetwarzanie grafów ?.}
+    \section{Przetwarzanie grafów.}
+    \begin{itemize}
+        \item \textbf{Wierzchołki} reprezentują \textbf{obiekty} (rekordy, wiersze, dokumenty).
+        \item Kolekcja wierzchołków reprezentuje powiązane/podobne obiekty.
+        \item Trzy ważne \textbf{cechy} węzłów:
+        \begin{itemize}
+            \item \textbf{Identyfikator} – łatwo się domyślic po co
+            \item \textbf{Etykietę} - mówi nam czym jest dany węzeł
+            \item \textbf{Zestaw właściwości} w postaci \textbf{klucz-wartość}.
+        \end{itemize}
 
+        \item \textbf{Krawędzie} (skierowane lub nie) reprezentują \textbf{relacje} pomiędzy wierzchołkami.
+        \item olekcja krawędzi reprezentuje powiązane/podobne relacje.
+        \item Dwie najważniejsze cechy:
+        \begin{itemize}
+            \item \textbf{Typ} relacji. Podobnie jak \textbf{etykieta} węzła, możemy nazwać go dowolnie.
+            \item \textbf{Zestaw właściwości}, zupełnie jak w węzłach
+        \end{itemize}
+    \end{itemize}
+
+    Kiedy używać grafowych baz danych?
+    \begin{enumerate}
+        \item Dane hierarchiczne
+        \item Skomplikowane relacje many-to-many
+        \item Skomplikowane relacje między obiektami
+    \end{enumerate}
+
+
+    Tworzenie grafowych baz danych
+    \begin{enumerate}
+        \item CREATE DATABASE
+        \item CREATE TABLE … AS NODE
+        \begin{itemize}
+            \item automatyczne dodanie dwóch kolumn do tabeli oraz stworzenie unique, non-clustered index na jednej z tych kolumn
+            \item graph\_id
+            \item node\_id
+        \end{itemize}
+        \item sys.tables - posiada kolumny is\_node oraz is\_edge ustawiane na wartości 0 lub 1
+        \item sys.columns - posiada kolumny graph\_type oraz graph\_type\_desc
+    \end{enumerate}
 \end{document}
